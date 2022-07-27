@@ -8,46 +8,127 @@
 <script>
 
 var data = [["International Movies", 1927],["Dramas", 1623],["Comedies", 1113],["International TV Shows", 1001],["Documentaries", 668],["TV Dramas", 599],["Action & Adventure", 597],["Independent Movies", 552],["TV Comedies", 436],["Thrillers", 392]];
-var margin = 50;
-var x = d3.scaleBand().domain([0,1,2,3,4,5,6,7,8,9,10]).range([0, 500]);
-var y = d3.scaleLinear().domain([0, 1927]).range([200, 0]);
 
-var mouseover = function(d) {
-    Tooltip
-      .style("opacity", 1)
-    d3.select(this)
-      .style("stroke", "black")
-      .style("opacity", 1)
-  }
-  var mousemove = function(d) {
-    Tooltip
-      .html("The exact value of this cell is: " + d[1])
-      .style("left", (d3.mouse(this)[0]+70) + "px")
-      .style("top", (d3.mouse(this)[1]) + "px")
-  }
-var mouseleave = function(d) {
-    Tooltip
-        .style("opacity", 0)
-    d3.select(this)
-        .style("stroke", "none")
-        .style("opacity", 0.8)
+var groups =
+["International Movies",
+"Dramas",
+"Comedies",
+"International TV Shows",
+"Documentaries",
+"TV Dramas",
+"Action & Adventure",
+"Independent Movies",
+"TV Comedies",
+"Thrillers"];
+
+values = [1927,
+1623,
+1113,
+1001,
+668,
+599,
+597,
+552,
+436,
+392
+];
+
+var margin = 50;
+var xwidth = 800;
+var yheight = 500;
+
+var x = d3.scaleBand().domain(groups).range([0, xwidth - 2 * margin]).padding(0.4);
+var y = d3.scaleLinear().domain([0, Math.max(...values)]).range([yheight - margin * 2, 0]);
+
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em")
+    while (word = words.pop()) {
+      line.push(word)
+      tspan.text(line.join(" "))
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop()
+        tspan.text(line.join(" "))
+        line = [word]
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", `${++lineNumber * lineHeight + dy}em`).text(word)
+      }
+    }
+  })
 }
+var focus = d3.select("svg")
+                .append("g")
+                .attr("class", "focus")
+                .style("display", "none");
+
+focus.append("rect")
+    .attr("class", "tooltip")
+    .attr("width", 100)
+    .attr("height", 50)
+    .attr("x", 10)
+    .attr("y", -22)
+    .attr("rx", 4)
+    .attr("ry", 4);
+
+focus.append("text")
+    .attr("class", "tooltip-date")
+    .attr("x", 18)
+    .attr("y", -2);
+
+focus.append("text")
+    .attr("x", 18)
+    .attr("y", 18)
+    .text("Likes:");
+
+focus.append("text")
+    .attr("class", "tooltip-likes")
+    .attr("x", 60)
+    .attr("y", 18);
+
 d3.select("svg")
-    .attr("width", 500)
-    .attr("height", 500)
+    .attr("width", xwidth)
+    .attr("height", yheight)
     .append("g")
         .attr("transform", "translate(" + margin + "," + margin + ")")
     .selectAll("rect")
     .data(data)
     .enter("rect")
     .append("rect")
-        .attr("x", function(d, i) {return x(i);})
+        .attr("x", function(d, i) {return x(d[0]);})
         .attr("y", function(d, i) {return y(d[1]);})
-        .attr("width", 25)
-        .attr("height", function(d, i) {return 200/1927 * d[1];})
-    .on("mouseover", mouseover)
-    .on("mousemove", mousemove)
-    .on("mouseleave", mouseleave)
+        .attr("width", x.bandwidth())
+        .attr("height", function(d, i) {return (yheight - margin * 2)/Math.max(...values) * d[1];})
+    .on("mouseover", function() { focus.style("display", null); })
+    .on("mouseout", function() { focus.style("display", "none"); })
+    .on("mousemove", mousemove);
+
+d3.select("svg")
+    .append("g")
+        .attr("transform", "translate(" + margin + "," + margin + ")")
+    .call(d3.axisLeft(y))
+
+d3.select("svg")
+    .append("g")
+        .attr("transform", "translate(" + margin + "," + ((yheight - margin * 2) + margin) + ")")
+    .call(d3.axisBottom(x))
+    .selectAll(".tick text")
+    .call(wrap, x.bandwidth())
+
+
+function mousemove() {
+    var tooltipX = d3.scaleBand
+    focus.attr("transform", "translate(" + 150 + "," + 50 + ")");
+    focus.select(".tooltip-date").text(d3.event.pageX);
+    focus.select(".tooltip-likes").text(i);
+}
+
 </script>
 </body>
 </html>
