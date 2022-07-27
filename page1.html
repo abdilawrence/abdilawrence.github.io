@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<style> rect {fill: #a589c0; stroke: #ffffff00;} </style>
+<body onload='init()'>
+<svg width=500 height=500>
+</svg>
+<script>
+
+var data = [["International Movies", 1927],["Dramas", 1623],["Comedies", 1113],["International TV Shows", 1001],["Documentaries", 668],["TV Dramas", 599],["Action & Adventure", 597],["Independent Movies", 552],["TV Comedies", 436],["Thrillers", 392]];
+var margin = 50;
+var x = d3.scaleBand().domain([0,1,2,3,4,5,6,7,8,9,10]).range([0, 500]);
+var y = d3.scaleLinear().domain([0, 1927]).range([200, 0]);
+
+var mouseover = function(d) {
+    Tooltip
+      .style("opacity", 1)
+    d3.select(this)
+      .style("stroke", "black")
+      .style("opacity", 1)
+  }
+  var mousemove = function(d) {
+    Tooltip
+      .html("The exact value of this cell is: " + d[1])
+      .style("left", (d3.mouse(this)[0]+70) + "px")
+      .style("top", (d3.mouse(this)[1]) + "px")
+  }
+var mouseleave = function(d) {
+    Tooltip
+        .style("opacity", 0)
+    d3.select(this)
+        .style("stroke", "none")
+        .style("opacity", 0.8)
+}
+d3.select("svg")
+    .attr("width", 500)
+    .attr("height", 500)
+    .append("g")
+        .attr("transform", "translate(" + margin + "," + margin + ")")
+    .selectAll("rect")
+    .data(data)
+    .enter("rect")
+    .append("rect")
+        .attr("x", function(d, i) {return x(i);})
+        .attr("y", function(d, i) {return y(d[1]);})
+        .attr("width", 25)
+        .attr("height", function(d, i) {return 200/1927 * d[1];})
+    .on("mouseover", mouseover)
+    .on("mousemove", mousemove)
+    .on("mouseleave", mouseleave)
+</script>
+</body>
+</html>
