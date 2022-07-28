@@ -6,7 +6,6 @@
 <svg width=300 height=300>
 </svg>
 <script>
-async function init() {
 
 var data = [[4,35,25],
 [6,28,21],
@@ -180,7 +179,6 @@ d3.select("svg")
       .attr("transform", 'translate(' + 50 + ',' + 250 + ')')
     .call(d3.axisBottom(x).tickValues([10, 20, 50, 100]).tickFormat(d3.format("~s")));
 
-}
 </script>
 </body>
 </html>

@@ -3,6 +3,20 @@
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <style> rect {fill: #a589c0; stroke: #ffffff00;} </style>
 <body onload='init()'>
+
+<div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/page1.html">1</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/page2.html">2</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/page3.html/">3</a>
+        </li>
+    </ul>
+</div>
 <svg width=500 height=500>
 </svg>
 <script>
@@ -70,7 +84,7 @@ var focus = d3.select("svg")
 
 focus.append("rect")
     .attr("class", "tooltip")
-    .attr("width", 100)
+    .attr("width", 150)
     .attr("height", 50)
     .attr("x", 10)
     .attr("y", -22)
@@ -85,7 +99,7 @@ focus.append("text")
 focus.append("text")
     .attr("x", 18)
     .attr("y", 18)
-    .text("Likes:");
+    .text("Titles:");
 
 focus.append("text")
     .attr("class", "tooltip-likes")
@@ -101,13 +115,14 @@ d3.select("svg")
     .data(data)
     .enter("rect")
     .append("rect")
+        .attr("class", "overlay")
         .attr("x", function(d, i) {return x(d[0]);})
         .attr("y", function(d, i) {return y(d[1]);})
         .attr("width", x.bandwidth())
         .attr("height", function(d, i) {return (yheight - margin * 2)/Math.max(...values) * d[1];})
     .on("mouseover", function() { focus.style("display", null); })
     .on("mouseout", function() { focus.style("display", "none"); })
-    .on("mousemove", mousemove);
+    .on("mousemove", mousemove)
 
 d3.select("svg")
     .append("g")
@@ -119,14 +134,53 @@ d3.select("svg")
         .attr("transform", "translate(" + margin + "," + ((yheight - margin * 2) + margin) + ")")
     .call(d3.axisBottom(x))
     .selectAll(".tick text")
-    .call(wrap, x.bandwidth())
+    .call(wrap, x.bandwidth() - 10)
 
+d3.select("svg")
+    .append("text")
+    .attr("x", 370)             
+    .attr("y", 35)
+    .attr("fill", "#ffffff")
+    .attr("text-anchor", "middle")  
+    .style("font-size", "16px") 
+    .style("text-decoration", "underline")  
+    .text("Quantity of Netflix Titles by Category");
+
+d3.select("svg")
+    .append("text")
+    .attr("x", 560)             
+    .attr("y", 150)
+    .attr("width", 50)
+    .attr("fill", "#ffffff")
+    .attr("text-anchor", "middle")  
+    .style("font-size", "10px")  
+    .text("Netflix has 40+ categories for its titles. These are the 10 most popular categories. ")
+
+d3.select("svg")
+    .append("text")
+    .attr("x", 560)             
+    .attr("y", 165)
+    .attr("width", 50)
+    .attr("fill", "#ffffff")
+    .attr("text-anchor", "middle")  
+    .style("font-size", "10px")  
+    .text("It is evident Netflix makes an effort to bring international titles to the platform,")
+
+d3.select("svg")
+    .append("text")
+    .attr("x", 560)             
+    .attr("y", 180)
+    .attr("width", 50)
+    .attr("fill", "#ffffff")
+    .attr("text-anchor", "middle")  
+    .style("font-size", "10px")  
+    .text("as International Movies and TV Shows are 1st and 4th, respectively.")
 
 function mousemove() {
-    var tooltipX = d3.scaleBand
-    focus.attr("transform", "translate(" + 150 + "," + 50 + ")");
-    focus.select(".tooltip-date").text(d3.event.pageX);
-    focus.select(".tooltip-likes").text(i);
+    var xindex = Math.floor((d3.mouse(this)[0]) / 70);
+    focus.attr("transform", "translate(" + (d3.event.pageX - 50) + "," + (y(data[xindex][1]) + 20) + ")");
+    focus.select(".tooltip-date").text(groups[xindex]);
+    focus.select(".tooltip-likes").text(values[xindex]);
 }
 
 </script>
