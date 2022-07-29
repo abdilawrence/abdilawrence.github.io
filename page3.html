@@ -1,193 +1,155 @@
 <!DOCTYPE html>
 <html>
-<script src='https://d3js.org/d3.v5.min.js'></script>
-<style> rect {fill: #a589c0; stroke: #ffffff00;} </style>
-<body onload='init()'>
-    Slides
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<body>
+Slides
 <div class="collapse navbar-collapse" id="navbarNavDropdown">
-    <ul class="navbar-nav">
-        <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/page1.html">1</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/page2.html">2</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/page3.html">3</a>
-        </li>
-    </ul>
+  <ul class="navbar-nav">
+      <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/index.html">Home</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link" href="/page1.html">1</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link" href="/page2.html">2</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link" href="/page3.html">3</a>
+      </li>
+  </ul>
 </div>
-<svg width=500 height=500>
-</svg>
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+<style>input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+</style>
+Use the box below to adjust the bins and explore the distribution further!
+<p>
+  <label># bins</label>
+  <input type="number" min="1" max="100" step="5" value="20" id="nBin">
+</p>
+
 <script>
 
-var data = [["United States", 2609],["India", 838],["United Kingdom", 601],["Canada", 318],["France", 271],["Japan", 231],["Spain", 178],["South Korea", 162],["Germany", 151],["Mexico", 129]];
+    // set the dimensions and margins of the graph
+    var margin = {top: 50, right: 50, bottom: 50, left: 50},
+        width = 800 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+    
+    // get the data
+    d3.csv("https://raw.githubusercontent.com/abdilawrence/abdilawrence.github.io/main/runtime.csv", function(data) {
+    
+      // X axis: scale and draw:
+      var x = d3.scaleLinear()
+          .domain([0, 300])
+          .range([0, width]);
+      svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
+    
+      // Y axis: initialization
+      var y = d3.scaleLinear()
+          .range([height, 0]);
+      var yAxis = svg.append("g")
 
-var groups =
-["United States",
-"India",
-"United Kingdom",
-"Canada",
-"France",
-"Japan",
-"Spain",
-"South Korea",
-"Germany",
-"Mexico"];
+      // A function that builds the graph for a specific value of bin
+      function update(nBin) {
+        // set the parameters for the histogram
+        var histogram = d3.histogram()
+            .value(function(d) { return d.runtime; })   // I need to give the vector of value
+            .domain(x.domain())  // then the domain of the graphic
+            .thresholds(x.ticks(nBin)); // then the numbers of bins
+    
+        // And apply this function to data to get the bins
+        var bins = histogram(data);
+    
+        // Y axis: update now that we know the domain
+        y.domain([0, d3.max(bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
+        yAxis
+            .transition()
+            .duration(1000)
+            .call(d3.axisLeft(y));
+    
+        // Join the rect with the bins data
+        var u = svg.selectAll("rect")
+            .data(bins)
+            u
+            .enter()
+            .append("rect") // Add a new rect for each new elements
+            
+            .merge(u) // get the already existing elements as well
+            .transition() // and apply changes to all of them
+            .duration(800)
+            .attr("x", 1)
+            .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+            .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+            .attr("height", function(d) { return height - y(d.length); })
+            .style("fill", "#a589c0")
+    
+        u
+        .exit()
+        .remove()
+    
+        }
+    
+      update(20)
+    
+      d3.select("#nBin").on("input", function() {
+        update(+this.value);
+      });
 
-values = [2609,
-838,
-601,
-318,
-271,
-231,
-178,
-162,
-151,
-129
-];
+        d3.select("svg")
+        .append("text")
+        .attr("x", 370)             
+        .attr("y", 35)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "16px") 
+        .style("text-decoration", "underline")  
+        .text("Distribution of Movie Runtimes");
+    
+        d3.select("svg")
+        .append("text")
+        .attr("x", 590)             
+        .attr("y", 150)
+        .attr("width", 50)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "12px")  
+        .text("Netflix has 4000+ movie titles in its catalog")
 
-var margin = 50;
-var xwidth = 800;
-var yheight = 500;
+        d3.select("svg")
+        .append("text")
+        .attr("x", 590)             
+        .attr("y", 165)
+        .attr("width", 50)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "12px")  
+        .text("Surprisingly, the majority of movie runtimes are under 100 minutes!")
 
-var x = d3.scaleBand().domain(groups).range([0, xwidth - 2 * margin]).padding(0.4);
-var y = d3.scaleLinear().domain([0, Math.max(...values)]).range([yheight - margin * 2, 0]);
-
-function wrap(text, width) {
-  text.each(function() {
-    var text = d3.select(this),
-        words = text.text().split(/\s+/).reverse(),
-        word,
-        line = [],
-        lineNumber = 0,
-        lineHeight = 1.1, // ems
-        y = text.attr("y"),
-        dy = parseFloat(text.attr("dy")),
-        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em")
-    while (word = words.pop()) {
-      line.push(word)
-      tspan.text(line.join(" "))
-      if (tspan.node().getComputedTextLength() > width) {
-        line.pop()
-        tspan.text(line.join(" "))
-        line = [word]
-        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", `${++lineNumber * lineHeight + dy}em`).text(word)
-      }
-    }
-  })
-}
-var focus = d3.select("svg")
-                .append("g")
-                .attr("class", "focus")
-                .style("display", "none");
-
-focus.append("rect")
-    .attr("class", "tooltip")
-    .attr("width", 150)
-    .attr("height", 50)
-    .attr("x", 10)
-    .attr("y", -22)
-    .attr("rx", 4)
-    .attr("ry", 4);
-
-focus.append("text")
-    .attr("class", "tooltip-date")
-    .attr("x", 18)
-    .attr("y", -2);
-
-focus.append("text")
-    .attr("x", 18)
-    .attr("y", 18)
-    .text("Titles:");
-
-focus.append("text")
-    .attr("class", "tooltip-likes")
-    .attr("x", 60)
-    .attr("y", 18);
-
-d3.select("svg")
-    .attr("width", xwidth)
-    .attr("height", yheight)
-    .append("g")
-        .attr("transform", "translate(" + margin + "," + margin + ")")
-    .selectAll("rect")
-    .data(data)
-    .enter("rect")
-    .append("rect")
-        .attr("class", "overlay")
-        .attr("x", function(d, i) {return x(d[0]);})
-        .attr("y", function(d, i) {return y(d[1]);})
-        .attr("width", x.bandwidth())
-        .attr("height", function(d, i) {return (yheight - margin * 2)/Math.max(...values) * d[1];})
-    .on("mouseover", function() { focus.style("display", null); })
-    .on("mouseout", function() { focus.style("display", "none"); })
-    .on("mousemove", mousemove)
-
-d3.select("svg")
-    .append("g")
-        .attr("transform", "translate(" + margin + "," + margin + ")")
-    .call(d3.axisLeft(y))
-
-d3.select("svg")
-    .append("g")
-        .attr("transform", "translate(" + margin + "," + ((yheight - margin * 2) + margin) + ")")
-    .call(d3.axisBottom(x))
-    .selectAll(".tick text")
-    .call(wrap, x.bandwidth() - 10)
-
-d3.select("svg")
-    .append("text")
-    .attr("x", 370)             
-    .attr("y", 35)
-    .attr("text-anchor", "middle")  
-    .style("font-size", "16px") 
-    .style("text-decoration", "underline")  
-    .text("Quantity of Netflix Titles by Nation");
-
-d3.select("svg")
-    .append("text")
-    .attr("x", 560)             
-    .attr("y", 150)
-    .attr("width", 50)
-    .attr("text-anchor", "middle")  
-    .style("font-size", "12px")  
-    .text("These are the top 10 countries by quantity of titles.")
-
-d3.select("svg")
-    .append("text")
-    .attr("x", 560)             
-    .attr("y", 165)
-    .attr("width", 50)
-    .attr("text-anchor", "middle")  
-    .style("font-size", "12px")  
-    .text("Unsurprisingly, the U.S. leads all countries in Netflix titles, and by quite a lot.")
-
-d3.select("svg")
-    .append("text")
-    .attr("x", 560)             
-    .attr("y", 180)
-    .attr("width", 50)
-    .attr("text-anchor", "middle")  
-    .style("font-size", "12px")  
-    .text("There is a diverse group of countries in this top 10.")
-
-d3.select("svg")
-    .append("text")
-    .attr("x", 560)             
-    .attr("y", 195)
-    .attr("width", 50)
-    .attr("text-anchor", "middle")  
-    .style("font-size", "12px")  
-    .text("Who knew Canada made so many films and TV Shows!")
-
-function mousemove() {
-    var xindex = Math.floor((d3.mouse(this)[0]) / 70);
-    focus.attr("transform", "translate(" + (d3.event.pageX - 50) + "," + (y(data[xindex][1]) + 20) + ")");
-    focus.select(".tooltip-date").text(groups[xindex]);
-    focus.select(".tooltip-likes").text(values[xindex]);
-}
-
-</script>
-</body>
-</html>
+        d3.select("svg")
+        .append("text")
+        .attr("x", 590)             
+        .attr("y", 180)
+        .attr("width", 50)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "12px")  
+        .text("Perhaps movies are getting shorter...")
+});
+    </script>
+    </body>
+    </html>
