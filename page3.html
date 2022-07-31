@@ -35,7 +35,7 @@ Slides
   Use the box below to adjust the bins and explore the distribution further!
   <br> Choose any of the following values: 12, 24, 48, 120
   <br><br> <label># bins</label>
-  <input type="number" min="1" max="120" step="0" value="30" id="nBin">
+  <input type="number" min="1" max="120" step="0" value="12" id="nBin">
 </p>
 
 <script>
@@ -110,7 +110,7 @@ Slides
     
         }
     
-      update(30)
+      update(12)
     
       d3.select("#nBin").on("input", function() {
         update(+this.value);
@@ -153,5 +153,6 @@ Slides
       .text("Perhaps movies are getting shorter...")
 });
     </script>
+    <p> The most common movie runtimes are between 80 and 100 minutes. Despite the success of many lengthy films (No Time To Die, Avengers: Endgame, The Batman, etc.) in recent years, it appears audiences are still fans of the shorter length film. </p>
     </body>
     </html>
